@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    {% block content %}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ticket Raising System</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            color: #2c3e50;
+        }
+        
+        .container {
+            width: 100%;
+            max-width: 800px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            overflow: hidden;
+        }
+        
+        header {
+            background: #2c3e50;
+            color: white;
+            padding: 25px;
+            text-align: center;
+        }
+        
+        h1 {
+            font-size: 28px;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+        }
+        
+        .description {
+            color: #ecf0f1;
+            font-size: 16px;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        
+        .form-container {
+            padding: 30px;
+        }
+        
+        .form-section {
+            margin-bottom: 30px;
+            padding-bottom: 25px;
+            border-bottom: 1px solid #eaeaea;
+        }
+        
+        .section-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 18px;
+            color: #3498db;
+            margin-bottom: 20px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+        
+        .section-title i {
+            font-size: 20px;
+        }
+        
+        .form-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .form-group {
+            flex: 1;
+            min-width: 250px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+        
+        input, textarea, select {
+            width: 100%;
+            padding: 14px 15px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        
+        input:focus, textarea:focus, select:focus {
+            border-color: #3498db;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
+        }
+        
+        input[readonly] {
+            background-color: #f8f9fa;
+            color: #6c757d;
+            cursor: not-allowed;
+        }
+        
+        textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+        
+        .submit-btn {
+            background: linear-gradient(to right, #3498db, #2c3e50);
+            color: white;
+            border: none;
+            padding: 16px 25px;
+            border-radius: 8px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15);
+        }
+        
+        .submit-btn:active {
+            transform: translateY(0);
+        }
+        
+        .help-text {
+            font-size: 14px;
+            color: #6c757d;
+            margin-top: 6px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .message-section {
+            padding: 20px;
+            background: #f8f9fa;
+            border-top: 1px solid #e9ecef;
+            border-radius: 0 0 12px 12px;
+        }
+        
+        .message-title {
+            font-size: 18px;
+            color: #2c3e50;
+            margin-bottom: 15px;
+            text-align: center;
+            font-weight: 600;
+        }
+        
+        .alert {
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: 8px;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .alert-success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .alert-error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .icon {
+            margin-right: 10px;
+            font-size: 20px;
+        }
+        
+        @media (max-width: 600px) {
+            .form-row {
+                flex-direction: column;
+                gap: 15px;
+            }
+            
+            .form-group {
+                min-width: 100%;
+            }
+            
+            .form-container {
+                padding: 20px;
+            }
+            
+            header {
+                padding: 20px 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1><i class="fas fa-ticket-alt"></i> Raise a Ticket</h1>
+
+        </header>
+        <form method="post" id="ticketForm">
+         {% csrf_token %}
+        <div class="form-container">
+            <form method="post" id="ticketForm">
+                <!-- Employee Information Section -->
+                <div class="form-section">
+                    <div class="section-title">
+                        <i class="fas fa-user"></i>
+                        <span>Employee Information</span>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="employee_code">Employee Code:</label>
+                            <input type="text" name="employee_code" id="employee_code" list="emp_list" required>
+                            <datalist id="emp_list">
+                                {% for e in employees %}
+                                    <option value="{{ e.employee_code }}">{{ e.name }} ({{ e.department }})</option>
+                                {% endfor %}
+                            </datalist>
+                            <div class="help-text">
+                                <i class="fas fa-info-circle"></i> Start typing to see suggestions
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="emp_name">Name:</label>
+                            <input type="text" id="emp_name" readonly>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="emp_dept">Department:</label>
+                            <input type="text" id="emp_dept" readonly>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="emp_doj">Date of Joining:</label>
+                            <input type="text" id="emp_doj" readonly>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Project Information Section -->
+                <div class="form-section">
+                    <div class="section-title">
+                        <i class="fas fa-project-diagram"></i>
+                        <span>Project Information</span>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="project_code">Project Code:</label>
+                            <input type="text" name="project_code" id="project_code" list="proj_list" required>
+                            <datalist id="proj_list">
+                            </datalist>
+                            <div class="help-text">
+                                <i class="fas fa-info-circle"></i> Start typing to see project suggestions
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                    <div class="form-group">
+                        <label for="proj_category">Cost Category:</label>
+                        <input type="text" id="proj_category" list="category_list">
+                        <datalist id="category_list"></datalist>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="proj_centre">Cost Centre:</label>
+                        <input type="text" id="proj_centre" list="centre_list">
+                        <datalist id="centre_list"></datalist>
+                    </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-col">
+                            <div class="form-group">
+                            <label for="proj_issue">Issue ID:</label>
+                            <input type="text" id="proj_issue" name="issue_id" list="proj_issue_list" >
+                            <datalist id="proj_issue_list"></datalist>
+                            <div class="help-text">
+                                <i class="fas fa-info-circle"></i> Enter the specific issue identifier
+                            </div>
+                        </div>
+                        </div>
+                        
+                        <div class="form-col">
+                        <div class="form-group">
+                            <label for="completed_date">Completed Date:</label>
+                            <input type="date" name="completed_date" id="completed_date">
+                        </div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="remark">Remarks:</label>
+                            <textarea name="remark" id="remark" placeholder="Please provide detailed information about the issue"></textarea>
+                            <div class="help-text">
+                                <i class="fas fa-info-circle"></i> Be as detailed as possible for faster resolution
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <button type="submit" class="submit-btn">
+                    <i class="fas fa-paper-plane"></i> Raise Ticket
+                </button>
+            </form>
+        </div>
+        
+        <div class="message-section">
+            <div class="message-title">System Messages</div>
+            <div id="messageContainer">
+                <div class="alert alert-success">
+                    <span class="icon">✅</span>
+                    <span>Form is ready to accept your ticket submission</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+$(document).ready(function(){
+    function updateProjectList() {
+        let params = {
+            cost_category: $("#proj_category").val(),
+            cost_centre: $("#proj_centre").val()
+        };
+
+        $.get("{% url 'get_project_codes' %}", params, function(data){
+            if(data.error) return;
+
+            // Project codes
+            let projList = $("#proj_list").empty();
+            data.projects.forEach(p => {
+                projList.append(`<option value="${p.project_code}">${p.project_code} - ${p.client_name}</option>`);
+            });
+
+            // Cost categories
+            let catList = $("#category_list").empty();
+            data.cost_categories.forEach(cat => catList.append(`<option value="${cat}">`));
+
+            // Cost centres
+            let centreList = $("#centre_list").empty();
+            data.cost_centres.forEach(c => centreList.append(`<option value="${c}">`));
+
+            // Issue IDs (unique only)
+            let issueList = $("#proj_issue_list").empty();
+            let seen = new Set();
+            data.projects.forEach(p => {
+                if (p.issue_id && !seen.has(p.issue_id)) {
+                    issueList.append(`<option value="${p.issue_id}">`);
+                    seen.add(p.issue_id);
+                }
+            });
+        });
+    }
+
+    // Trigger update on filter change
+    $("#proj_category, #proj_centre").on("change keyup", updateProjectList);
+
+    // When user selects project code
+    $("#project_code").on("change", function(){
+        let val = $(this).val().split(" - ")[0]; // get code only
+        $.get("{% url 'get_project_details' %}", {project_code: val}, function(data){
+            if(!data.error){
+                $("#proj_category").val(data.cost_category);
+                $("#proj_centre").val(data.cost_centre);
+
+                // If project already has an issue, prefill it
+                if(data.issue_id){
+                    $("#proj_issue").val(data.issue_id);
+                } else {
+                    $("#proj_issue").val(""); // leave blank for new entry
+                }
+            }
+        });
+    });
+
+    // Employee auto-fill
+    $("#employee_code").on("change", function(){
+        let emp_code = $(this).val();
+        if(!emp_code) return;
+        $.get("{% url 'get_employee_details' %}", {employee_code: emp_code}, function(data){
+            if(!data.error){
+                $("#emp_name").val(data.name);
+                $("#emp_dept").val(data.department);
+                $("#emp_doj").val(data.doj);
+            }
+        });
+    });
+
+    // Initialize on load
+    updateProjectList();
+});
+</script>
+
+{% endblock %}
+</body>
+</html>
+

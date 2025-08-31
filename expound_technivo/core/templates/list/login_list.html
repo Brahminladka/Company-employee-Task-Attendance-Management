@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login Credentials Management</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #f5f7f9;
+            color: #333;
+            line-height: 1.6;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+            position: relative;
+        }
+        
+        .back-button {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 16px;
+            background-color: #95a5a6;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            margin-bottom: 20px;
+        }
+        
+        .back-button:hover {
+            background-color: #7f8c8d;
+            transform: translateY(-2px);
+        }
+        
+        h2 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #ecf0f1;
+        }
+        
+        /* Search Bar */
+        .search-container {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .search-box {
+            position: relative;
+            flex: 1;
+            min-width: 250px;
+        }
+        
+        .search-box input {
+            width: 100%;
+            padding: 12px 15px 12px 40px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 1rem;
+        }
+        
+        .search-box i {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #7f8c8d;
+        }
+        
+        /* Table Styles */
+        .table-container {
+            overflow-x: auto;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            margin-top: 20px;
+        }
+        
+        .credentials-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+        }
+        
+        .credentials-table th {
+            background-color: #2c3e50;
+            color: white;
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+            position: sticky;
+            top: 0;
+        }
+        
+        .credentials-table td {
+            padding: 15px;
+            border-bottom: 1px solid #ecf0f1;
+        }
+        
+        .credentials-table tr:last-child td {
+            border-bottom: none;
+        }
+        
+        .credentials-table tr:hover {
+            background-color: #f8f9fa;
+        }
+        
+        /* Status Badges */
+        .status-badge {
+            display: inline-block;
+            padding: 5px 12px;
+            border-radius: 15px;
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+        
+        .status-active {
+            background-color: #e7f6e9;
+            color: #27ae60;
+        }
+        
+        .status-inactive {
+            background-color: #feeaea;
+            color: #e74c3c;
+        }
+        
+        /* Password Field */
+        .password-field {
+            font-family: monospace;
+            position: relative;
+            padding-right: 30px;
+        }
+        
+        .toggle-password {
+            position: absolute;
+            right: 5px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: #7f8c8d;
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+        
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: #7f8c8d;
+        }
+        
+        .empty-state i {
+            font-size: 3rem;
+            margin-bottom: 15px;
+            color: #bdc3c7;
+        }
+        
+        /* No Results State */
+        .no-results {
+            display: none;
+            text-align: center;
+            padding: 30px 20px;
+            color: #7f8c8d;
+        }
+        
+        .no-results i {
+            font-size: 2.5rem;
+            margin-bottom: 15px;
+            color: #bdc3c7;
+        }
+        
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .credentials-table {
+                font-size: 0.9rem;
+            }
+            
+            .credentials-table th, 
+            .credentials-table td {
+                padding: 12px 10px;
+            }
+            
+            .search-container {
+                flex-direction: column;
+            }
+            
+            .search-box {
+                width: 100%;
+            }
+        }
+        
+        @media (max-width: 576px) {
+            .container {
+                padding: 15px;
+            }
+            
+            .credentials-table {
+                font-size: 0.8rem;
+            }
+            
+            .credentials-table th, 
+            .credentials-table td {
+                padding: 10px 8px;
+            }
+            
+            .status-badge {
+                font-size: 0.75rem;
+                padding: 4px 8px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Back Button -->
+        <a href="#" class="back-button" onclick="goBack()">
+            <i class="fas fa-arrow-left"></i> Back
+        </a>
+
+        <h2>Login Credentials List</h2>
+        
+        <!-- Search Bar -->
+        <div class="search-container">
+            <div class="search-box">
+                <i class="fas fa-search"></i>
+                <input type="text" id="searchInput" placeholder="Search by name or employee code...">
+            </div>
+        </div>
+        
+        <div class="table-container">
+            <table class="credentials-table">
+                <thead>
+                    <tr>
+                        <th>Employee Code</th>
+                        <th>Username</th>
+                        <th>Name</th>
+                        <th>Department</th>
+                        <th>Password</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody id="credentialsTableBody">
+                    {% for login in logins %}
+                    <tr>
+                        <td class="employee-code">{{ login.employee_code }}</td>
+                        <td>{{ login.username }}</td>
+                        <td class="employee-name">{{ login.name }}</td>
+                        <td>{{ login.department }}</td>
+                        <td class="password-field">
+                            <span class="password-text">••••••••</span>
+                            <button class="toggle-password" onclick="togglePassword(this)">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                            <span class="actual-password" style="display: none;">{{ login.password }}</span>
+                        </td>
+                        <td>
+                            <span class="status-badge {% if login.status == 'Active' %}status-active{% else %}status-inactive{% endif %}">
+                                {{ employee.status }}
+                            </span>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6">
+                            <div class="empty-state">
+                                <i class="fas fa-user-lock"></i>
+                                <h3>No login records found</h3>
+                                <p>There are no login credentials to display</p>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            
+            <!-- No Results Message -->
+            <div id="noResults" class="no-results">
+                <i class="fas fa-search"></i>
+                <h3>No matching records found</h3>
+                <p>Try adjusting your search terms</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Function to go back to the previous page
+        function goBack() {
+            window.history.back();
+        }
+        
+        // Function to toggle password visibility
+        function togglePassword(button) {
+            const row = button.closest('td');
+            const passwordText = row.querySelector('.password-text');
+            const actualPassword = row.querySelector('.actual-password');
+            const icon = button.querySelector('i');
+            
+            if (passwordText.style.display === 'none') {
+                passwordText.style.display = 'inline';
+                actualPassword.style.display = 'none';
+                icon.className = 'fas fa-eye';
+            } else {
+                passwordText.style.display = 'none';
+                actualPassword.style.display = 'inline';
+                icon.className = 'fas fa-eye-slash';
+            }
+        }
+        
+        // Search functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            const searchInput = document.getElementById('searchInput');
+            const tableBody = document.getElementById('credentialsTableBody');
+            const noResults = document.getElementById('noResults');
+            const rows = tableBody.querySelectorAll('tr');
+            
+            // Check if there are any records
+            const emptyState = tableBody.querySelector('.empty-state');
+            const hasRecords = !emptyState;
+            
+            searchInput.addEventListener('keyup', function() {
+                const searchTerm = searchInput.value.toLowerCase();
+                let hasMatches = false;
+                
+                if (hasRecords) {
+                    rows.forEach(row => {
+                        // Skip the empty state row if it exists
+                        if (row.querySelector('.empty-state')) return;
+                        
+                        const employeeCode = row.querySelector('.employee-code').textContent.toLowerCase();
+                        const employeeName = row.querySelector('.employee-name').textContent.toLowerCase();
+                        
+                        if (employeeCode.includes(searchTerm) || employeeName.includes(searchTerm)) {
+                            row.style.display = '';
+                            hasMatches = true;
+                        } else {
+                            row.style.display = 'none';
+                        }
+                    });
+                    
+                    // Show/hide no results message
+                    if (hasMatches || searchTerm === '') {
+                        noResults.style.display = 'none';
+                    } else {
+                        noResults.style.display = 'block';
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+</html>

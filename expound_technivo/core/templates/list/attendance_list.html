@@ -1,0 +1,601 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Attendance Management System</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #4361ee;
+            --secondary: #3f37c9;
+            --success: #4cc9f0;
+            --danger: #f72585;
+            --warning: #f8961e;
+            --info: #4895ef;
+            --light: #f8f9fa;
+            --dark: #212529;
+            --gray: #6c757d;
+            --light-gray: #e9ecef;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #f5f7fb;
+            color: #333;
+            line-height: 1.6;
+            padding: 0;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+            max-width: 100%;
+            overflow: hidden;
+        }
+        
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid var(--light-gray);
+        }
+        
+        .header h1 {
+            color: var(--primary);
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .controls {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .search-box {
+            position: relative;
+            flex: 1;
+            max-width: 400px;
+        }
+        
+        .search-box input {
+            width: 100%;
+            padding: 10px 15px 10px 40px;
+            border: 1px solid var(--light-gray);
+            border-radius: 6px;
+            font-size: 16px;
+        }
+        
+        .search-box i {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--gray);
+        }
+        
+        .filter-controls {
+            display: flex;
+            gap: 10px;
+        }
+        
+        select, button {
+            padding: 10px 15px;
+            border: 1px solid var(--light-gray);
+            border-radius: 6px;
+            background: white;
+            font-size: 14px;
+        }
+        
+        button {
+            background: var(--primary);
+            color: white;
+            border: none;
+            cursor: pointer;
+            transition: background 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        button:hover {
+            background: var(--secondary);
+        }
+        
+        .button-secondary {
+            background: var(--gray);
+        }
+        
+        .button-secondary:hover {
+            background: #5a6268;
+        }
+        
+        .table-wrapper {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            overflow: auto;
+            flex: 1;
+            margin-bottom: 20px;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 1200px;
+        }
+        
+        thead {
+            background: var(--primary);
+            color: white;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+        
+        th {
+            padding: 16px 12px;
+            text-align: left;
+            font-weight: 600;
+            position: relative;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+        
+        th:hover {
+            background: var(--secondary);
+        }
+        
+        th i {
+            margin-left: 5px;
+            font-size: 12px;
+        }
+        
+        tbody tr {
+            border-bottom: 1px solid var(--light-gray);
+        }
+        
+        tbody tr:last-child {
+            border-bottom: none;
+        }
+        
+        tbody tr:hover {
+            background-color: rgba(67, 97, 238, 0.05);
+        }
+        
+        td {
+            padding: 14px 12px;
+            vertical-align: middle;
+            white-space: nowrap;
+        }
+        
+        input, select {
+            width: 100%;
+            padding: 8px 10px;
+            border: 1px solid var(--light-gray);
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        
+        input:focus, select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 2px rgba(67, 97, 238, 0.2);
+        }
+        
+        .status {
+            display: inline-block;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+        
+        .status-not-started {
+            background: rgba(248, 150, 30, 0.15);
+            color: var(--warning);
+        }
+        
+        .status-in-progress {
+            background: rgba(73, 149, 239, 0.15);
+            color: var(--info);
+        }
+        
+        .status-completed {
+            background: rgba(76, 201, 240, 0.15);
+            color: var(--success);
+        }
+        
+        .footer {
+            text-align: center;
+            padding: 15px;
+            color: var(--gray);
+            font-size: 14px;
+            border-top: 1px solid var(--light-gray);
+        }
+        
+        .no-data {
+            text-align: center;
+            padding: 40px;
+            color: var(--gray);
+        }
+        
+        @media (max-width: 768px) {
+            .header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 15px;
+            }
+            
+            .controls {
+                flex-direction: column;
+            }
+            
+            .search-box {
+                max-width: 100%;
+            }
+            
+            .filter-controls {
+                flex-wrap: wrap;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1><i class="fas fa-calendar-check"></i> Attendance Management</h1>
+            <div>
+               {% if request.session.role|lower == "hr" %} <button id="exportBtn"><i class="fas fa-download"></i> Export CSV</button> {% endif %}
+                <button class="button-secondary" id="backBtn"><i class="fas fa-arrow-left"></i> Back</button>
+            </div>
+        </div>
+      
+        <div class="controls">
+            <div class="search-box">
+                <i class="fas fa-search"></i>
+                <input type="text" id="searchInput" placeholder="Search attendance records...">
+            </div>
+            
+            <div class="filter-controls">
+                <select id="departmentFilter">
+                    <option value="">All Departments</option>
+                    <option value="abap">ABAP</option>
+                    <option value="hr">HR</option>
+                    <option value="pp">PP</option>
+                    <option value="project-manager">PROJECT MANAGER</option>
+                    <option value="sales">SALES</option>
+                    <option value="accounts">ACCOUNTS</option>
+                    <option value="program-manager">PROGRAM MANAGER</option>
+                    <option value="team-lead">TEAM LEAD</option>
+                    <option value="fico">FICO</option>
+                    <option value="hcm-hr">HCM/HR</option>
+                    <option value="mm">MM</option>
+                    <option value="bw">BW</option>
+                    <option value="sd">SD</option>
+                    <option value="ps">PS</option>
+                    <option value="support-manager">SUPPORT MANAGER</option>
+                    <option value="crm">CRM</option>
+                    <option value="sac">SAC</option>
+                    <option value="basis">BASIS</option>
+                    <option value="management">MANAGEMENT</option>
+                    <option value="office-boy">OFFICE BOY</option>
+                    <option value="it">IT</option>
+                    <option value="business-analyst">Business Analyst</option>
+                    <option value="business-development">BUSINESS DEVELOPMENT</option>
+                    <option value="manager">MANAGER</option>
+                </select>
+                <select id="statusFilter">
+                    <option value="">All Status</option>
+                    <option value="Not Started">Not Started</option>
+                    <option value="Work In Progress">Work In Progress</option>
+                    <option value="Completed">Completed</option>
+                </select>
+                <button id="applyFilters"><i class="fas fa-filter"></i> Apply Filters</button>
+            </div>
+        </div>
+        <form method="get" class="d-flex align-items-center gap-2 mb-3">
+            <label for="work_date" class="mb-0">Filter by Work Date:</label>
+            <input type="date" name="work_date" id="work_date" value="{{ selected_date }}" class="form-control form-control-sm" style="width: auto;">
+            <button type="submit" class="btn btn-primary btn-sm">Filter</button>
+            <a href="{% url 'attendance_list' %}" class="btn btn-secondary btn-sm">Reset</a>
+        </form>
+
+        <div class="table-wrapper">
+            <table id="attendanceTable">
+                <thead>
+                    <tr>
+                        <th>SERIAL_NO <i class="fas fa-sort"></i></th>
+                        <th>Employee Code <i class="fas fa-sort"></i></th>
+                        <th>Name <i class="fas fa-sort"></i></th>
+                        <th>DOJ <i class="fas fa-sort"></i></th>
+                        <th>Department <i class="fas fa-sort"></i></th>
+                        <th>Work Date <i class="fas fa-sort"></i></th>
+                        <th>Day <i class="fas fa-sort"></i></th>
+                        <th>Project Code <i class="fas fa-sort"></i></th>
+                        <th>Cost Category <i class="fas fa-sort"></i></th>
+                        <th>Cost Centre <i class="fas fa-sort"></i></th>
+                        <th>Issue ID <i class="fas fa-sort"></i></th>
+                        <th>Manager <i class="fas fa-sort"></i></th>
+                        <th>Completed TILL <i class="fas fa-sort"></i></th>
+                        <th>Remark</th>
+                        <th>Hours</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Your server-side code will populate this -->
+                    {% for att in attendance %}
+                    <tr align="center" data-id="{{ att.id }}">
+                        <td>{{ att.id }}</td>
+                        <td>{{ att.employee_code }}</td>
+                        <td>{{ att.name }}</td>
+                        <td>{{ att.doj }}</td>
+                        <td>{{ att.department }}</td>
+                        <td>{{ att.work_date }}</td>
+                        <td>{{ att.work_day }}</td>
+                        <td>{{ att.project_code }}</td>
+                        <td>{{ att.cost_category }}</td>
+                        <td>{{ att.cost_centre }}</td>
+                        <td>{{ att.issue_id }}</td>
+                        <td>{{ att.manager_name }}</td>
+                        <td>{{ att.completed_date }}</td>
+                        <!-- Editable fields -->
+                        <td>
+                        <input type="text" class="update-field" data-field="remark" value="{{ att.remark }}">
+                        </td>
+                        <td>
+                        <input type="number" step="0.01" class="update-field" data-field="hrs" value="{{ att.hrs }}">
+                        </td>
+                        <td>
+                        <select class="update-field" data-field="status">
+                            <option value="Not Started" {% if att.status == "Not Started" %}selected{% endif %}>Not Started</option>
+                            <option value="Work In Progress" {% if att.status == "Work In Progress" %}selected{% endif %}>Work In Progress</option>
+                            <option value="Completed" {% if att.status == "Completed" %}selected{% endif %}>Completed</option>
+                        </select>
+                        </td>
+                        <td>
+                        <form method="POST" action="{% url 'attendance_delete' att.pk %}" style="display:inline;">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-danger btn-sm">
+                                Delete
+                            </button>
+                            </form>
+                        </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% if messages %}
+    <div>
+        {% for message in messages %}
+        <div class="alert {{ message.tags }}">
+            {{ message }}
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+    
+    <div class="footer">
+        Attendance Management System &copy;
+    </div>
+</div>
+<!-- Mini Notepad Modal -->
+<div id="remarkModal" style="display:none; position:fixed; top:50%; left:50%; transform:translate(-50%,-50%);
+    background:#fff; border:1px solid #ccc; padding:20px; box-shadow:0 0 10px rgba(0,0,0,0.3); z-index:1000;">
+    <h4>Edit Remark</h4>
+    <textarea id="remarkTextarea" rows="5" cols="40"></textarea>
+    <br><br>
+    <button id="saveRemarkBtn" class="btn btn-primary">Save</button>
+    <button id="closeRemarkBtn" class="btn btn-secondary">Close</button>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const modal = document.getElementById('remarkModal');
+    const textarea = document.getElementById('remarkTextarea');
+    const saveBtn = document.getElementById('saveRemarkBtn');
+    const closeBtn = document.getElementById('closeRemarkBtn');
+    let currentInput = null;
+
+    // --- Remark Modal Functionality ---
+    document.querySelectorAll('.update-field[data-field="remark"]').forEach(input => {
+        input.addEventListener('click', function() {
+            currentInput = this;
+            textarea.value = this.value; // Load current remark
+            modal.style.display = 'block';
+        });
+    });
+
+    // Save button
+    saveBtn.addEventListener('click', function() {
+        if(currentInput){
+            currentInput.value = textarea.value; // Update the table input
+            $(currentInput).trigger("change");    // ✅ trigger AJAX update
+        }
+        modal.style.display = 'none';
+        currentInput = null;
+    });
+
+    // Close button
+    closeBtn.addEventListener('click', function() {
+        modal.style.display = 'none';
+        currentInput = null;
+    });
+
+    // Close if clicked outside modal
+    window.addEventListener('click', function(e) {
+        if(e.target === modal){
+            modal.style.display = 'none';
+            currentInput = null;
+        }
+    });
+});
+
+// Ensure jQuery runs after DOM ready
+$(document).ready(function() {
+    // --- AJAX Update ---
+    $(document).on("change", ".update-field", function () {
+        let field = $(this).data("field");
+        let value = $(this).val();
+        let row = $(this).closest("tr");
+        let id = row.data("id");
+
+        $.ajax({
+            url: `/attendance/update/${id}/`,
+            type: "POST",
+            data: {
+                field: field,
+                value: value,
+                csrfmiddlewaretoken: "{{ csrf_token }}"
+            },
+            success: function (response) {
+                console.log("Updated successfully:", response);
+            },
+            error: function (xhr) {
+                console.error("Error:", xhr.responseText);
+                alert("Failed to update.");
+            }
+        });
+    });
+
+    // --- Export to CSV ---
+    $("#exportBtn").click(function() {
+        let csv = [];
+        let headers = [];
+
+        // Headers
+        $("#attendanceTable th").each(function() {
+            headers.push($(this).text().trim().replace(/ +/g, ' '));
+        });
+        csv.push(headers.join(","));
+
+        // Rows
+        $("#attendanceTable tbody tr").each(function() {
+            let row = [];
+            $(this).find("td").each(function() {
+                let text = $(this).find("input, select").length > 0
+                    ? $(this).find("input, select").val().trim()
+                    : $(this).text().trim();
+
+                if (text.includes(",") || text.includes('"')) {
+                    text = '"' + text.replace(/"/g, '""') + '"';
+                }
+                row.push(text);
+            });
+            csv.push(row.join(","));
+        });
+
+        // Download
+        let csvContent = "data:text/csv;charset=utf-8," + csv.join("\n");
+        let encodedUri = encodeURI(csvContent);
+        let link = document.createElement("a");
+        link.setAttribute("href", encodedUri);
+        link.setAttribute("download", "attendance_data.csv");
+        document.body.appendChild(link);
+        link.click();
+    });
+
+    // --- Back Button ---
+    $("#backBtn").click(function() {
+        window.history.back();
+    });
+
+    // --- Search ---
+    $("#searchInput").on("keyup", function() {
+        let value = $(this).val().toLowerCase();
+        $("#attendanceTable tbody tr").filter(function() {
+            $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
+        });
+    });
+
+    // --- Filter ---
+    $("#applyFilters").click(function() {
+        let department = $("#departmentFilter").val();
+        let status = $("#statusFilter").val();
+        
+        $("#attendanceTable tbody tr").each(function() {
+            let show = true;
+            // Get the department value - try different approaches
+            let deptValue = $(this).find("td:eq(4)").text().trim().toLowerCase();
+            let deptSelect = $(this).find("td:eq(4) select").val();
+            
+            // Get status value
+            let statusValue = $(this).find("select.status-select").val();
+            
+            // Debugging - log values to console
+            console.log("Department cell text:", deptValue);
+            console.log("Department select value:", deptSelect);
+            console.log("Status value:", statusValue);
+            
+            // Apply department filter
+            if (department) {
+                // Try both the text content and any select value
+                if (deptValue !== department.toLowerCase() && 
+                    (!deptSelect || deptSelect !== department)) {
+                    show = false;
+                }
+            }
+            
+            // Apply status filter
+            if (status && statusValue !== status) {
+                show = false;
+            }
+            
+            $(this).toggle(show);
+        });
+    });
+
+    // --- Sorting ---
+    $("th").click(function() {
+        let table = $(this).parents("table").eq(0);
+        let rows = table.find("tr:gt(0)").toArray().sort(comparator($(this).index()));
+        this.asc = !this.asc;
+        if (!this.asc) rows = rows.reverse();
+        for (let i = 0; i < rows.length; i++) {
+            table.append(rows[i]);
+        }
+    });
+
+    function comparator(idx) {
+        return function(a, b) {
+            let valA = getCellValue(a, idx);
+            let valB = getCellValue(b, idx);
+            if ($.isNumeric(valA) && $.isNumeric(valB)) {
+                return valA - valB;
+            } else {
+                return valA.toString().localeCompare(valB.toString());
+            }
+        };
+    }
+
+    function getCellValue(row, index) {
+        let cell = $(row).children("td").eq(index);
+        return cell.find("input, select").length > 0
+            ? cell.find("input, select").val()
+            : cell.text();
+    }
+});
+</script>
+
+</body>
+</html>

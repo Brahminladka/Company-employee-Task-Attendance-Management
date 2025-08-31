@@ -1,0 +1,888 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ticket Management System</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #4e73df;
+            --secondary: #6c757d;
+            --success: #198754;
+            --danger: #dc3545;
+            --warning: #fd7e14;
+            --light: #f8f9fa;
+            --dark: #343a40;
+        }
+        
+        body {
+            background-color: #f5f7fb;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            padding: 20px;
+            overflow-x: hidden;
+            padding-bottom: 70px; /* Space for fixed scrollbar */
+        }
+        
+        .header-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: linear-gradient(135deg, var(--primary) 0%, #224abe 100%);
+            color: white;
+            padding: 15px 20px;
+            border-radius: 10px 10px 0 0;
+            margin-bottom: 0;
+        }
+        
+        .back-btn {
+            background-color: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            padding: 8px 15px;
+            border-radius: 5px;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+        }
+        
+        .back-btn:hover {
+            background-color: rgba(255, 255, 255, 0.3);
+            color: white;
+        }
+        
+        .table-container {
+            background-color: white;
+            border-radius: 0 0 10px 10px;
+            box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+            overflow: hidden;
+            margin-bottom: 30px;
+        }
+        
+        .table-wrapper {
+            overflow-x: auto;
+            width: 100%;
+            position: relative;
+        }
+        
+        .table {
+            min-width: 1500px;
+            width: 100%;
+            margin-bottom: 0;
+        }
+        
+        .table thead th {
+            background-color: var(--primary);
+            color: white;
+            position: sticky;
+            top: 0;
+            vertical-align: middle;
+            padding: 12px 15px;
+            font-weight: 600;
+            white-space: nowrap;
+            z-index: 10;
+        }
+        
+        .table tbody td {
+            vertical-align: middle;
+            padding: 12px 15px;
+            white-space: nowrap;
+        }
+        
+        .update-field {
+            transition: all 0.3s ease;
+            padding: 6px 10px;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+            width: 100%;
+            font-size: 0.9rem;
+        }
+        
+        .update-field:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 0.2rem rgba(78, 115, 223, 0.25);
+            outline: none;
+        }
+        
+        .update-field:disabled {
+            background-color: #f8f9fa;
+            opacity: 0.8;
+        }
+        
+        .update-success {
+            border-color: var(--success) !important;
+            box-shadow: 0 0 0 0.2rem rgba(25, 135, 84, 0.25) !important;
+        }
+        
+        .update-error {
+            border-color: var(--danger) !important;
+            box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25) !important;
+        }
+        
+        .share-container {
+            position: relative;
+            min-width: 250px;
+        }
+        
+        .share-select {
+            padding: 6px 10px;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+            width: 100%;
+            margin-bottom: 8px;
+            font-size: 0.9rem;
+        }
+        
+        .selected-employees .badge {
+            font-size: 0.75rem;
+            padding: 0.35em 0.65em;
+            margin: 2px;
+            background-color: var(--primary);
+        }
+        
+        .btn-remove {
+            cursor: pointer;
+            padding: 0 0.25rem;
+            color: white;
+            opacity: 0.7;
+        }
+        
+        .btn-remove:hover {
+            opacity: 1;
+        }
+        
+        .status-select {
+            padding: 6px 10px;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+            width: 100%;
+            font-size: 0.9rem;
+            background-color: white;
+        }
+        
+        .status-not-started {
+            background-color: var(--secondary);
+            color: white;
+        }
+        
+        .status-in-progress {
+            background-color: var(--warning);
+            color: white;
+        }
+        
+        .status-completed {
+            background-color: var(--success);
+            color: white;
+        }
+        
+        .ticket-row {
+            transition: background-color 0.3s ease;
+        }
+        
+        .ticket-row:hover {
+            background-color: rgba(78, 115, 223, 0.05);
+        }
+        
+        .btn-share {
+            width: 100%;
+            margin-top: 5px;
+            background-color: var(--secondary);
+            border: none;
+            color: white;
+            padding: 6px 12px;
+            border-radius: 4px;
+            font-size: 0.9rem;
+            transition: all 0.3s;
+        }
+        
+        .btn-share:hover {
+            background-color: #5a6268;
+        }
+        
+        .btn-delete {
+            padding: 6px 12px;
+            font-size: 0.9rem;
+        }
+        
+        .alert-toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1050;
+            min-width: 300px;
+        }
+        
+        .pagination {
+            margin: 20px 0;
+        }
+        
+        .filter-section {
+            background-color: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 0.25rem 0.5rem rgba(0, 0, 0, 0.1);
+        }
+        
+        .empty-state {
+            padding: 40px 0;
+            text-align: center;
+            color: var(--secondary);
+        }
+        
+        .empty-state i {
+            font-size: 3rem;
+            margin-bottom: 15px;
+            color: #dee2e6;
+        }
+        
+        .user-info {
+            color: white;
+            font-size: 0.9rem;
+            text-align: right;
+        }
+        
+        /* Fixed horizontal scrollbar */
+        .fixed-scroll-container {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: white;
+            padding: 15px 20px;
+            border-top: 1px solid #dee2e6;
+            box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .scroll-info {
+            font-size: 0.9rem;
+            color: var(--secondary);
+            margin-right: 15px;
+        }
+        
+        .fixed-scrollbar {
+            flex-grow: 1;
+            height: 20px;
+            background: #f1f1f1;
+            border-radius: 10px;
+            position: relative;
+            margin: 0 15px;
+        }
+        
+        .scroll-thumb {
+            position: absolute;
+            height: 100%;
+            background: var(--primary);
+            border-radius: 10px;
+            cursor: pointer;
+            min-width: 30px;
+        }
+        
+        .scroll-btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 5px 12px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        
+        .scroll-btn:hover {
+            background: #3a59c7;
+        }
+        
+        /* Fixed first column */
+        .table thead th:first-child,
+        .table tbody td:first-child {
+            position: sticky;
+            left: 0;
+            background-color: white;
+            z-index: 5;
+        }
+        
+        .table thead th:first-child {
+            background-color: var(--primary);
+            z-index: 15;
+        }
+        
+        .table tbody tr:hover td:first-child {
+            background-color: rgba(78, 115, 223, 0.05);
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="header-container">
+            <h1 class="m-0">Ticket Management System</h1>
+            <div class="user-info">
+                <div>Welcome, {{ request.session.username }}</div>
+                <div>({{ request.session.role }})</div>
+            </div>
+        </div>
+        
+        <!-- Filter Section -->
+        <div class="filter-section mb-4">
+            <div class="row">
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label for="statusFilter" class="form-label">Status</label>
+                        <select class="form-select" id="statusFilter">
+                            <option value="">All Statuses</option>
+                            <option value="Not Started">Not Started</option>
+                            <option value="Work In Progress">Work In Progress</option>
+                            <option value="Completed">Completed</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label for="searchInput" class="form-label">Search</label>
+                        <input type="text" class="form-control" id="searchInput" placeholder="Search tickets...">
+                    </div>
+                </div>
+                <div class="col-md-3 d-flex align-items-end">
+                    <button class="btn btn-primary w-100" id="applyFilters">Apply Filters</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="table-container">
+            <div class="table-wrapper" id="tableWrapper">
+                <table class="table table-hover mb-0">
+                    <thead>
+                        <tr>
+                            <th>SERIAL_NO</th>
+                            <th>Employee Code</th>
+                            <th>Name</th>
+                            <th>Department</th>
+                            <th>Project Code</th>
+                            <th>Cost Category</th>
+                            <th>Cost Centre</th>
+                            <th>Issue ID</th>
+                            <th>Manager</th>
+                            <th>Completed Date</th>
+                            <th>Remark</th>
+                            <th>Share With</th>
+                            <th>Status</th>
+                            {% if request.session.role|lower == "manager" %}
+                            <th>Actions</th>
+                            {% endif %}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for ticket in tickets %}
+                        <tr class="ticket-row" data-id="{{ ticket.id }}">
+                            <td>{{ ticket.id }}</td>
+                            <td>{{ ticket.employee_code }}</td>
+                            <td>{{ ticket.name }}</td>
+                            <td>{{ ticket.department }}</td>
+                            <td>{{ ticket.project_code }}</td>
+                            <td>{{ ticket.cost_category }}</td>
+                            <td>{{ ticket.cost_centre }}</td>
+                            <td>{{ ticket.issue_id }}</td>
+                            <td>{{ ticket.manager_name }}</td>
+                            <td>{{ ticket.completed_date|date:'Y-m-d' }}</td>
+                            
+                            <!-- Editable fields -->
+                            <td><input type="text" class="update-field" data-field="remark" value="{{ ticket.remark }}"></td>
+                            <td>
+                                <div class="share-container">
+                                    <input type="text" 
+                                        class="share-select" 
+                                        list="emp_list_{{ ticket.id }}" 
+                                        placeholder="Type employee name or code..."
+                                        data-ticket="{{ ticket.id }}">
+                                    
+                                    <!-- Unique datalist ID for each row -->
+                                    <datalist id="emp_list_{{ ticket.id }}">
+                                        {% for e in employees %}
+                                            <option value="{{ e.employee_code }}">{{ e.name }} ({{ e.department }})</option>
+                                        {% endfor %}
+                                    </datalist>
+                                    <br>
+                                    <button class="btn btn-sm btn-secondary btn-share" 
+                                            data-ticket="{{ ticket.id }}">
+                                        <i class="fas fa-share-alt me-1"></i> Share
+                                    </button>
+                                    
+                                    <!-- Show selected employees -->
+                                    <div class="selected-employees mt-1">
+                                        <small class="text-muted">Selected: <span class="selected-list"></span></small>
+                                    </div>
+                                    
+                                    <div class="share-status mt-1">
+                                        <small class="text-muted">
+                                            {% if ticket.shared_with.exists %}
+                                                Shared with: {{ ticket.shared_with.count }} employee(s)
+                                            {% else %}
+                                                Not shared
+                                            {% endif %}
+                                        </small>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <select class="status-select update-field" data-field="status">
+                                    <option value="Not Started" {% if ticket.status == "Not Started" %}selected{% endif %}>Not Started</option>
+                                    <option value="Work In Progress" {% if ticket.status == "Work In Progress" %}selected{% endif %}>Work In Progress</option>
+                                    <option value="Completed" {% if ticket.status == "Completed" %}selected{% endif %}>Completed</option>
+                                </select>
+                            </td>
+                            {% if request.session.role|lower == "manager" %}
+                            <td>
+                                <form method="POST" action="{% url 'ticket_delete' ticket.pk %}" style="display:inline;">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-danger btn-sm btn-delete">
+                                        <i class="fas fa-trash-alt me-1"></i> Delete
+                                    </button>
+                                </form>
+                            </td>
+                            {% endif %}
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="15" class="empty-state">
+                                <i class="fas fa-inbox"></i>
+                                <p class="mt-2">No tickets found.</p>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Pagination -->
+        <nav aria-label="Page navigation">
+            <ul class="pagination justify-content-center">
+                <li class="page-item disabled">
+                    <a class="page-link" href="#" tabindex="-1">Previous</a>
+                </li>
+                <li class="page-item active"><a class="page-link" href="#">1</a></li>
+                <li class="page-item"><a class="page-link" href="#">2</a></li>
+                <li class="page-item"><a class="page-link" href="#">3</a></li>
+                <li class="page-item">
+                    <a class="page-link" href="#">Next</a>
+                </li>
+            </ul>
+        </nav>
+    </div>
+
+    <!-- Fixed horizontal scrollbar -->
+    <div class="fixed-scroll-container">
+        <div class="scroll-info">
+            <i class="fas fa-info-circle me-1"></i> Scroll to navigate all columns
+        </div>
+        <div class="fixed-scrollbar" id="fixedScrollbar">
+            <div class="scroll-thumb" id="scrollThumb"></div>
+        </div>
+        <div>
+            <button class="scroll-btn me-2" id="scrollLeftBtn">
+                <i class="fas fa-chevron-left"></i>
+            </button>
+            <button class="scroll-btn" id="scrollRightBtn">
+                <i class="fas fa-chevron-right"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div class="modal fade" id="deleteConfirmModal" tabindex="-1" aria-labelledby="deleteConfirmModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="deleteConfirmModalLabel">Confirm Deletion</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    Are you sure you want to delete this ticket? This action cannot be undone.
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <form id="deleteForm" method="POST" action="">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-danger">Delete</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+    $(document).ready(function() {
+        // Store selected employees for each ticket
+        let selectedEmployees = {};
+
+        // Initialize status badges
+        $('.status-select').each(function() {
+            updateStatusBadge($(this));
+        });
+
+        // Fixed horizontal scrollbar functionality
+        const tableWrapper = document.getElementById('tableWrapper');
+        const fixedScrollbar = document.getElementById('fixedScrollbar');
+        const scrollThumb = document.getElementById('scrollThumb');
+        const scrollLeftBtn = document.getElementById('scrollLeftBtn');
+        const scrollRightBtn = document.getElementById('scrollRightBtn');
+        
+        // Initialize scroll thumb position
+        function updateScrollThumb() {
+            const scrollPercentage = tableWrapper.scrollLeft / (tableWrapper.scrollWidth - tableWrapper.clientWidth);
+            const thumbPosition = scrollPercentage * (fixedScrollbar.offsetWidth - scrollThumb.offsetWidth);
+            scrollThumb.style.left = thumbPosition + 'px';
+        }
+        
+        // Set initial scroll thumb size and position
+        function initScrollbar() {
+            const ratio = tableWrapper.clientWidth / tableWrapper.scrollWidth;
+            const thumbWidth = Math.max(30, fixedScrollbar.offsetWidth * ratio);
+            scrollThumb.style.width = thumbWidth + 'px';
+            updateScrollThumb();
+        }
+        
+        // Initialize scrollbar
+        initScrollbar();
+        
+        // Update scroll thumb when table is scrolled
+        tableWrapper.addEventListener('scroll', updateScrollThumb);
+        
+        // Update on window resize
+        window.addEventListener('resize', initScrollbar);
+        
+        // Scroll with buttons
+        scrollLeftBtn.addEventListener('click', () => {
+            tableWrapper.scrollBy({ left: -200, behavior: 'smooth' });
+        });
+        
+        scrollRightBtn.addEventListener('click', () => {
+            tableWrapper.scrollBy({ left: 200, behavior: 'smooth' });
+        });
+        
+        // Drag functionality for scroll thumb
+        let isDragging = false;
+        
+        scrollThumb.addEventListener('mousedown', (e) => {
+            isDragging = true;
+            const startX = e.clientX;
+            const startLeft = scrollThumb.offsetLeft;
+            
+            function onMouseMove(e) {
+                if (!isDragging) return;
+                const deltaX = e.clientX - startX;
+                let newLeft = startLeft + deltaX;
+                
+                // Constrain within scrollbar
+                newLeft = Math.max(0, Math.min(fixedScrollbar.offsetWidth - scrollThumb.offsetWidth, newLeft));
+                
+                // Update thumb position
+                scrollThumb.style.left = newLeft + 'px';
+                
+                // Update table scroll position
+                const scrollPercentage = newLeft / (fixedScrollbar.offsetWidth - scrollThumb.offsetWidth);
+                tableWrapper.scrollLeft = scrollPercentage * (tableWrapper.scrollWidth - tableWrapper.clientWidth);
+            }
+            
+            function onMouseUp() {
+                isDragging = false;
+                document.removeEventListener('mousemove', onMouseMove);
+                document.removeEventListener('mouseup', onMouseUp);
+            }
+            
+            document.addEventListener('mousemove', onMouseMove);
+            document.addEventListener('mouseup', onMouseUp);
+        });
+        
+        // Click on scrollbar to jump to position
+        fixedScrollbar.addEventListener('click', (e) => {
+            if (e.target === scrollThumb) return;
+            
+            const clickX = e.clientX - fixedScrollbar.getBoundingClientRect().left;
+            const thumbWidth = scrollThumb.offsetWidth;
+            let newLeft = clickX - thumbWidth / 2;
+            
+            // Constrain within scrollbar
+            newLeft = Math.max(0, Math.min(fixedScrollbar.offsetWidth - thumbWidth, newLeft));
+            
+            // Update thumb position
+            scrollThumb.style.left = newLeft + 'px';
+            
+            // Update table scroll position
+            const scrollPercentage = newLeft / (fixedScrollbar.offsetWidth - thumbWidth);
+            tableWrapper.scrollLeft = scrollPercentage * (tableWrapper.scrollWidth - tableWrapper.clientWidth);
+        });
+
+        // Update field functionality - FIXED FOR DATABASE SAVING
+        $(".update-field").on("change", function() {
+            let $field = $(this);
+            let ticketId = $field.closest("tr").data("id");
+            let fieldName = $field.data("field");
+            let value = $field.val();
+
+            $field.prop('disabled', true);
+
+            // For status field, update the visual appearance
+            if (fieldName === 'status') {
+                updateStatusBadge($field, value);
+            }
+
+            // AJAX call to save to database
+            $.ajax({
+                url: "/tickets/update/" + ticketId + "/", // Using direct URL path
+                method: "POST",
+                data: {
+                    field: fieldName,
+                    value: value,
+                    csrfmiddlewaretoken: "{{ csrf_token }}"
+                },
+                success: function(response) {
+                    $field.addClass('update-success');
+                    setTimeout(() => {
+                        $field.removeClass('update-success');
+                        $field.prop('disabled', false);
+                    }, 1000);
+                    showAlert('Changes saved successfully!', 'success');
+                },
+                error: function(xhr, status, error) {
+                    console.error("Save error:", error);
+                    $field.addClass('update-error');
+                    setTimeout(() => {
+                        $field.removeClass('update-error');
+                        $field.prop('disabled', false);
+                    }, 2000);
+                    showAlert('Error saving changes. Please try again.', 'danger');
+                }
+            });
+        });
+
+        // Update visual appearance of status field
+        function updateStatusBadge($field, value = null) {
+            if (!value) {
+                value = $field.val();
+            }
+            
+            // Remove all status classes
+            $field.removeClass('status-not-started status-in-progress status-completed');
+            
+            // Add appropriate class based on value
+            if (value === 'Not Started') {
+                $field.addClass('status-not-started');
+            } else if (value === 'Work In Progress') {
+                $field.addClass('status-in-progress');
+            } else if (value === 'Completed') {
+                $field.addClass('status-completed');
+            }
+        }
+
+        // ADD EMPLOYEE (When user types and presses Enter)
+        $(".share-select").on("keypress", function(e) {
+            if (e.which === 13) { // Enter key
+                addEmployee($(this));
+            }
+        });
+
+        $(".share-select").on("blur", function() {
+            addEmployee($(this));
+        });
+
+        function addEmployee($input) {
+            let ticketId = $input.data("ticket");
+            let typedValue = $input.val().trim();
+
+            if (!typedValue) return;
+
+            // Initialize if needed
+            if (!selectedEmployees[ticketId]) {
+                selectedEmployees[ticketId] = [];
+            }
+
+            let employeeCode = null;
+            let employeeName = null;
+
+            // Look in the datalist for match
+            $(`#emp_list_${ticketId} option`).each(function() {
+                let code = $(this).val();           // employee_code
+                let text = $(this).text();          // name (department)
+                let name = text.split(' (')[0];     // just name
+
+                // Check if typed value matches code or name
+                if (code === typedValue || name.toLowerCase() === typedValue.toLowerCase()) {
+                    employeeCode = code;
+                    employeeName = name;
+                    return false; // break loop
+                }
+            });
+
+            if (employeeCode && !selectedEmployees[ticketId].includes(employeeCode)) {
+                selectedEmployees[ticketId].push(employeeCode);
+                showSelectedEmployees(ticketId);
+                $input.val(''); // clear input
+                showAlert(`Added ${employeeName} to selection`, 'success');
+            } else if (!employeeCode) {
+                showAlert("Employee not found: " + typedValue, 'danger');
+            } else {
+                showAlert("Employee already added!", 'warning');
+            }
+        }
+
+        // SHOW SELECTED EMPLOYEES
+        function showSelectedEmployees(ticketId) {
+            let codes = selectedEmployees[ticketId] || [];
+            let $display = $(`.share-select[data-ticket="${ticketId}"]`).siblings('.selected-employees').find('.selected-list');
+
+            if (codes.length === 0) {
+                $display.html('None');
+                return;
+            }
+
+            let html = '';
+            codes.forEach(function(code) {
+                // Find employee name from datalist
+                let name = code; // fallback
+                $(`#emp_list_${ticketId} option`).each(function() {
+                    if ($(this).val() === code) {
+                        name = $(this).text().split(' (')[0];
+                        return false;
+                    }
+                });
+
+                html += `<span class="badge bg-primary me-1">
+                            ${name} 
+                            <span class="btn-remove" onclick="removeEmployee('${ticketId}', '${code}')">×</span>
+                         </span>`;
+            });
+
+            $display.html(html);
+        }
+
+        // SHARE BUTTON - FIXED FOR DATABASE SAVING
+        $(".btn-share").click(function() {
+            let $button = $(this);
+            let ticketId = $button.data("ticket");
+            let employeeCodes = selectedEmployees[ticketId] || [];
+
+            if (employeeCodes.length === 0) {
+                showAlert("Please add employees first!", 'warning');
+                return;
+            }
+
+            $button.prop('disabled', true).html('<span class="spinner-border spinner-border-sm" role="status"></span> Sharing...');
+
+            // AJAX call to save to database - using direct URL path
+            $.ajax({
+                url: "/tickets/share/", // Using direct URL path instead of named URL
+                method: "POST",
+                data: {
+                    ticket_id: ticketId,
+                    'employee_codes[]': employeeCodes,
+                    csrfmiddlewaretoken: "{{ csrf_token }}"
+                },
+                success: function(response) {
+                    if (response.success) {
+                        showAlert(`Shared with ${response.shared_count} employee(s)!`, 'success');
+                        
+                        // Clear selections
+                        selectedEmployees[ticketId] = [];
+                        showSelectedEmployees(ticketId);
+                        
+                        // Update status display
+                        $button.siblings('.share-status').find('small').html(
+                            `Shared with: ${response.shared_count} employee(s)`
+                        );
+                    } else {
+                        showAlert("Error: " + response.error, 'danger');
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error("Share error:", error);
+                    showAlert("Network error!", 'danger');
+                },
+                complete: function() {
+                    $button.prop('disabled', false).html('<i class="fas fa-share-alt me-1"></i> Share');
+                }
+            });
+        });
+
+        // REMOVE EMPLOYEE (Global function)
+        window.removeEmployee = function(ticketId, employeeCode) {
+            if (selectedEmployees[ticketId]) {
+                selectedEmployees[ticketId] = selectedEmployees[ticketId].filter(code => code !== employeeCode);
+                showSelectedEmployees(ticketId);
+            }
+        };
+
+        // Delete confirmation modal
+        $('.btn-delete').click(function(e) {
+            e.preventDefault();
+            var form = $(this).closest('form');
+            $('#deleteForm').attr('action', form.attr('action'));
+            $('#deleteConfirmModal').modal('show');
+        });
+
+        // Helper function to show alerts
+        function showAlert(message, type) {
+            // Remove any existing alerts
+            $('.alert-toast').remove();
+            
+            // Create alert
+            const alertClass = type === 'success' ? 'alert-success' : 
+                              type === 'danger' ? 'alert-danger' :
+                              type === 'warning' ? 'alert-warning' : 'alert-info';
+                              
+            const icon = type === 'success' ? 'fa-check-circle' :
+                         type === 'danger' ? 'fa-exclamation-circle' :
+                         type === 'warning' ? 'fa-exclamation-triangle' : 'fa-info-circle';
+            
+            const alert = $(`<div class="alert ${alertClass} alert-dismissible fade show alert-toast" role="alert">
+                <i class="fas ${icon} me-2"></i>
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>`);
+            
+            // Add to page and auto dismiss after 3 seconds
+            $('body').append(alert);
+            setTimeout(() => {
+                alert.alert('close');
+            }, 3000);
+        }
+
+        // Filter functionality
+        $('#applyFilters').click(function() {
+            const statusFilter = $('#statusFilter').val();
+            const departmentFilter = $('#departmentFilter').val();
+            const searchText = $('#searchInput').val().toLowerCase();
+            
+            $('.ticket-row').each(function() {
+                const status = $(this).find('.status-select').val();
+                const department = $(this).find('td:eq(3)').text();
+                const rowText = $(this).text().toLowerCase();
+                
+                let showRow = true;
+                
+                if (statusFilter && status !== statusFilter) {
+                    showRow = false;
+                }
+                
+                if (departmentFilter && department !== departmentFilter) {
+                    showRow = false;
+                }
+                
+                if (searchText && !rowText.includes(searchText)) {
+                    showRow = false;
+                }
+                
+                $(this).toggle(showRow);
+            });
+        });
+    });
+    </script>
+</body>
+</html>

@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Employee Management</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #f5f7f9;
+            color: #333;
+            line-height: 1.6;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+            position: relative;
+        }
+        
+        /* Back Button */
+        .back-button {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 16px;
+            background-color: #95a5a6;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            margin-bottom: 20px;
+        }
+        
+        .back-button:hover {
+            background-color: #7f8c8d;
+            transform: translateY(-2px);
+        }
+        
+        h1 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        h3 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #ecf0f1;
+        }
+        
+        /* Add Employee Button */
+        .add-employee-btn {
+            display: inline-block;
+            margin-bottom: 20px;
+            padding: 12px 20px;
+            background-color: #3498db;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        
+        .add-employee-btn:hover {
+            background-color: #2980b9;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+        }
+        
+        /* Table Styles */
+        .table-container {
+            overflow-x: auto;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            margin-top: 20px;
+        }
+        
+        .employee-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+        }
+        
+        .employee-table th {
+            background-color: #2c3e50;
+            color: white;
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+        }
+        
+        .employee-table td {
+            padding: 15px;
+            border-bottom: 1px solid #ecf0f1;
+        }
+        
+        .employee-table tr:last-child td {
+            border-bottom: none;
+        }
+        
+        .employee-table tr:hover {
+            background-color: #f8f9fa;
+        }
+        
+        /* Status Badge */
+        .status-badge {
+            display: inline-block;
+            padding: 5px 12px;
+            border-radius: 15px;
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+        
+        .status-active {
+            background-color: #e7f6e9;
+            color: #27ae60;
+        }
+        
+        .status-inactive {
+            background-color: #feeaea;
+            color: #e74c3c;
+        }
+        
+        /* Action Buttons */
+        .action-btn {
+            display: inline-block;
+            padding: 8px 12px;
+            background-color: #f8f9fa;
+            color: #2c3e50;
+            text-decoration: none;
+            border-radius: 4px;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            border: 1px solid #ddd;
+        }
+        
+        .action-btn:hover {
+            background-color: #3498db;
+            color: white;
+            border-color: #3498db;
+        }
+        
+        /* Search and Filter */
+        .search-filter-container {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        
+        .search-box {
+            position: relative;
+            flex: 1;
+            min-width: 250px;
+        }
+        
+        .search-box input {
+            width: 100%;
+            padding: 12px 15px 12px 40px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 1rem;
+        }
+        
+        .search-box i {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #7f8c8d;
+        }
+        
+        .filter-dropdown {
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            background: white;
+            min-width: 150px;
+        }
+        
+        /* Pagination */
+        .pagination {
+            display: flex;
+            justify-content: center;
+            margin-top: 30px;
+            gap: 10px;
+        }
+        
+        .pagination a {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            border-radius: 5px;
+            background: #f8f9fa;
+            color: #2c3e50;
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+        
+        .pagination a:hover, .pagination a.active {
+            background: #3498db;
+            color: white;
+        }
+        
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: #7f8c8d;
+        }
+        
+        .empty-state i {
+            font-size: 3rem;
+            margin-bottom: 15px;
+            color: #bdc3c7;
+        }
+        
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .search-filter-container {
+                flex-direction: column;
+            }
+            
+            .search-box, .filter-dropdown {
+                width: 100%;
+            }
+            
+            .employee-table {
+                font-size: 0.9rem;
+            }
+            
+            .employee-table th, 
+            .employee-table td {
+                padding: 10px;
+            }
+        }
+        
+        @media (max-width: 576px) {
+            .container {
+                padding: 15px;
+            }
+            
+            .employee-table {
+                font-size: 0.8rem;
+            }
+            
+            .employee-table th, 
+            .employee-table td {
+                padding: 8px 5px;
+            }
+            
+            .action-btn {
+                padding: 5px 8px;
+                font-size: 0.8rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Back Button -->
+        <a href="#" class="back-button" onclick="goBack()">
+            <i class="fas fa-arrow-left"></i> Back
+        </a>
+
+        <h1>Employee Management System</h1>
+        
+        <h3>Employees</h3>
+        
+        {% if request.session.role|lower == "hr" %}
+        <a href="{% url 'employee_add' %}" class="add-employee-btn">
+            <i class="fas fa-plus"></i> Add Employee
+        </a>
+        {% endif %}
+        
+        <div class="search-filter-container">
+            <div class="search-box">
+                <i class="fas fa-search"></i>
+                <input type="text" placeholder="Search employees...">
+            </div>
+            
+            <select class="filter-dropdown">
+            <option value="">All Departments</option>
+            <option value="abap">ABAP</option>
+            <option value="hr">HR</option>
+            <option value="pp">PP</option>
+            <option value="project-manager">PROJECT MANAGER</option>
+            <option value="sales">SALES</option>
+            <option value="accounts">ACCOUNTS</option>
+            <option value="program-manager">PROGRAM MANAGER</option>
+            <option value="team-lead">TEAM LEAD</option>
+            <option value="fico">FICO</option>
+            <option value="hcm-hr">HCM/HR</option>
+            <option value="mm">MM</option>
+            <option value="bw">BW</option>
+            <option value="sd">SD</option>
+            <option value="ps">PS</option>
+            <option value="support-manager">SUPPORT MANAGER</option>
+            <option value="crm">CRM</option>
+            <option value="sac">SAC</option>
+            <option value="basis">BASIS</option>
+            <option value="management">MANAGEMENT</option>
+            <option value="office-boy">OFFICE BOY</option>
+            <option value="it">IT</option>
+            <option value="business-analyst">Business Analyst</option>
+            <option value="business-development">BUSINESS DEVELOPMENT</option>
+            <option value="manager">MANAGER</option>
+            </select>
+            
+            <select class="filter-dropdown">
+                <option value="">All Status</option>
+                <option value="active">Active</option>
+                <option value="inactive">Inactive</option>
+            </select>
+        </div>
+        
+        <div class="table-container">
+            <table class="employee-table">
+                <thead>
+                    <tr>
+                        <th>Emp Code</th>
+                        <th>Name</th>
+                        <th>Department</th>
+                        <th>DOJ</th>
+                        <th>Exit Date</th>
+                        <th>MANAGER NAME</th>
+                        <th>Status</th>
+                        {% if request.session.role|lower == "hr" %}
+                        <th>Action</th>
+                        {% endif %}
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for e in employees %}
+                    <tr>
+                        <td>{{ e.employee_code }}</td>
+                        <td>{{ e.name }}</td>
+                        <td>{{ e.department }}</td>
+                        <td>{{ e.doj }}</td>
+                        <td>{{ e.exit_date|default:"N/A" }}</td>
+                        <td>{{ e.manager_names_display }}</td>
+                        <td>
+                            <span class="status-badge {% if e.status %}status-active{% else %}status-inactive{% endif %}">
+                                {{ e.status|yesno:"Active,Inactive" }}
+                            </span>
+                        </td>
+                        <td>
+                            {% if request.session.role|lower == "hr" %}
+                                <a href="{% url 'employee_edit' e.id %}" class="action-btn">
+                                    <i class="fas fa-edit"></i> Edit
+                                </a>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6">
+                            <div class="empty-state">
+                                <i class="fas fa-users"></i>
+                                <h3>No employees found</h3>
+                                <p>Get started by adding your first employee</p>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        
+        <div class="pagination">
+            <a href="#" class="active">1</a>
+            <a href="#">2</a>
+            <a href="#">3</a>
+            <a href="#"><i class="fas fa-chevron-right"></i></a>
+        </div>
+    </div>
+
+    <script>
+        // Function to go back to the previous page
+        function goBack() {
+            window.history.back();
+        }
+        
+        // Simple JavaScript for search functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            const searchInput = document.querySelector('.search-box input');
+            const tableRows = document.querySelectorAll('.employee-table tbody tr');
+            
+            searchInput.addEventListener('keyup', function() {
+                const searchTerm = searchInput.value.toLowerCase();
+                
+                tableRows.forEach(row => {
+                    const name = row.querySelector('td:nth-child(2)').textContent.toLowerCase();
+                    const dept = row.querySelector('td:nth-child(3)').textContent.toLowerCase();
+                    const empCode = row.querySelector('td:nth-child(1)').textContent.toLowerCase();
+                    
+                    if (name.includes(searchTerm) || dept.includes(searchTerm) || empCode.includes(searchTerm)) {
+                        row.style.display = '';
+                    } else {
+                        row.style.display = 'none';
+                    }
+                });
+            });
+            
+            // Department filter functionality
+            const deptFilter = document.querySelector('.filter-dropdown:first-of-type');
+            deptFilter.addEventListener('change', function() {
+                const selectedDept = this.value.toLowerCase();
+                
+                tableRows.forEach(row => {
+                    if (!selectedDept) {
+                        row.style.display = '';
+                        return;
+                    }
+                    
+                    const dept = row.querySelector('td:nth-child(3)').textContent.toLowerCase();
+                    if (dept.includes(selectedDept)) {
+                        row.style.display = '';
+                    } else {
+                        row.style.display = 'none';
+                    }
+                });
+            });
+            
+            // Status filter functionality
+            const statusFilter = document.querySelector('.filter-dropdown:last-of-type');
+            statusFilter.addEventListener('change', function() {
+                const selectedStatus = this.value.toLowerCase();
+                
+                tableRows.forEach(row => {
+                    if (!selectedStatus) {
+                        row.style.display = '';
+                        return;
+                    }
+                    
+                    const status = row.querySelector('td:nth-child(5)').textContent.toLowerCase();
+                    if (status.includes(selectedStatus)) {
+                        row.style.display = '';
+                    } else {
+                        row.style.display = 'none';
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>
